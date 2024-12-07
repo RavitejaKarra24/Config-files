@@ -176,3 +176,16 @@ function cursor() {
         open -a "Cursor" "$argPath"
     fi
 }
+
+
+# Install vim-plug if not already installed
+if [ ! -f ~/.vim/autoload/plug.vim ]; then
+  curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+fi
+
+# Ensure Vim plugins are installed
+if [ ! -d ~/.vim/plugged ]; then
+  echo "Installing vim plugins..."
+  vim +'PlugInstall --sync' +qa
+fi
