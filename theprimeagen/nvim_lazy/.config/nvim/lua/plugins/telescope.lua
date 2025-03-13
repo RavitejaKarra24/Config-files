@@ -9,5 +9,6 @@ return {
     vim.keymap.set('n', '<leader>ps', function()
         builtin.grep_string({ search = vim.fn.input("Grep > ") })
     end) -- Added the missing 'end' here
+    vim.keymap.set('n', '<leader>pg', builtin.live_grep, { desc = "Live grep in files" })
   end -- Added the missing 'end' here for the config function
 } -- Added the missing closing bracket for the return table

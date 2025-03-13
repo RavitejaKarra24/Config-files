@@ -72,4 +72,3 @@ vim.keymap.set("n", "<leader>vpl", "<cmd>e ~/.config/nvim/lua/plugins/<CR>");
 vim.keymap.set("n", "<leader><leader>", function()
     vim.cmd("source %")
 end)
-

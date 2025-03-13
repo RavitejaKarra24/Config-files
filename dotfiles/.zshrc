@@ -141,6 +141,7 @@ export NVM_DIR="$HOME/.nvm"
 # Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/.fzf.zsh
 
 
 # history setup
@@ -166,7 +167,6 @@ eval "$(zoxide init zsh)"
 
 alias cd="z"
 
-# To open a folder in cursor
 function cursor() {
     if [[ $# = 0 ]]; then
         open -a "Cursor"
@@ -176,6 +176,8 @@ function cursor() {
         open -a "Cursor" "$argPath"
     fi
 }
+
+export PATH="/opt/homebrew/anaconda3/bin:$PATH"
 
 
 # Install vim-plug if not already installed
@@ -189,3 +191,37 @@ if [ ! -d ~/.vim/plugged ]; then
   echo "Installing vim plugins..."
   vim +'PlugInstall --sync' +qa
 fi
+export PATH="/usr/local/opt/openjdk/bin:$PATH"
+
+# --- Yazi setup ---
+export EDITOR="nvim"
+
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+
+
+eval "$(atuin init zsh)"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/ravitejakarra/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/ravitejakarra/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/ravitejakarra/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/ravitejakarra/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+
+# bun completions
+[ -s "/Users/ravitejakarra/.bun/_bun" ] && source "/Users/ravitejakarra/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+#alias
+alias k="kubectl"
+
+
