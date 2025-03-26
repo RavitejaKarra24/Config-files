@@ -6,7 +6,12 @@ return {
       'neovim/nvim-lspconfig',
       'williamboman/mason.nvim',
       'williamboman/mason-lspconfig.nvim',
-      'hrsh7th/nvim-cmp',
+      -- Specify a stable version of nvim-cmp that works with apply_text_edits
+      {
+        'hrsh7th/nvim-cmp',
+        version = '0.0.1', -- Use a specific version or commit
+        -- You can also use: commit = 'a9c701fa7e12e9257e99e00131d3c274e72b86c0'
+      },
       'hrsh7th/cmp-nvim-lsp',
       'L3MON4D3/LuaSnip',
     },
@@ -103,14 +108,44 @@ return {
       local cmp = require('cmp')
       local cmp_action = require('lsp-zero').cmp_action()
 
+      -- Create a custom apply_text_edits function to handle the missing function
+      local apply_text_edits = function(edits, bufnr, encoding)
+        -- Simple implementation to handle the edits
+        for _, edit in ipairs(edits) do
+          local start_line = edit.range.start.line
+          local start_char = edit.range.start.character
+          local end_line = edit.range["end"].line
+          local end_char = edit.range["end"].character
+          
+          -- Apply the edit
+          vim.api.nvim_buf_set_text(
+            bufnr,
+            start_line,
+            start_char,
+            end_line,
+            end_char,
+            vim.split(edit.newText, "\n")
+          )
+        end
+      end
+      
+      -- Override the apply_text_edits function if it doesn't exist
+      local api = require('cmp.utils.api')
+      if not api.apply_text_edits then
+        api.apply_text_edits = apply_text_edits
+      end
+
       cmp.setup({
         mapping = cmp.mapping.preset.insert({
-            -- Navigate to previous item in completion menu
+          -- Navigate to previous item in completion menu
           ['<C-p>'] = cmp.mapping.select_prev_item(),
           -- Navigate to next item in completion menu
           ['<C-n>'] = cmp.mapping.select_next_item(),
-          -- Confirm selection
-          ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+          -- Confirm selection with explicit behavior
+          ['<C-y>'] = cmp.mapping.confirm({
+            behavior = cmp.ConfirmBehavior.Replace,
+            select = true
+          }),
           -- Show completion menu
           ['<C-Space>'] = cmp.mapping.complete(),
         }),
@@ -124,7 +159,22 @@ return {
             require('luasnip').lsp_expand(args.body)
           end,
         },
+        experimental = {
+          ghost_text = true,
+        },
+        formatting = {
+          fields = {'abbr', 'kind', 'menu'},
+          format = function(entry, item)
+            item.menu = ({
+              nvim_lsp = "[LSP]",
+              luasnip = "[Snippet]",
+              buffer = "[Buffer]",
+            })[entry.source.name]
+            return item
+          end,
+        },
       })
     end,
   },
 }
+
